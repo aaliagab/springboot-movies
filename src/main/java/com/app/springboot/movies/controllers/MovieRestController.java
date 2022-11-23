@@ -23,6 +23,9 @@ import org.springframework.web.bind.annotation.RestController;
 import com.app.springboot.movies.entities.Movie;
 import com.app.springboot.movies.services.IMovieService;
 
+import io.swagger.v3.oas.annotations.*;
+import io.swagger.v3.oas.annotations.responses.*;
+
 @RestController
 @RequestMapping("/api/movies")
 public class MovieRestController {
@@ -30,6 +33,10 @@ public class MovieRestController {
 	@Autowired
 	private IMovieService movieService;
 
+	@Operation(summary = "Get a movies list")
+	@ApiResponses(value = { 
+			  @ApiResponse(responseCode = "200", description = "Found movies"),
+			  @ApiResponse(responseCode = "404", description = "Movies not found") })
 	@GetMapping("/")
 	public ResponseEntity<?> index() {
 		Map<String, Object> response = new HashMap<>();
@@ -49,6 +56,7 @@ public class MovieRestController {
 		return new ResponseEntity<>(movies, HttpStatus.OK);
 	}
 
+	@Operation(summary = "Get a movies list by page number")
 	@GetMapping("/page/{page}")
 	public ResponseEntity<?> index(@PathVariable Integer page) {
 		Map<String, Object> response = new HashMap<>();
@@ -68,6 +76,7 @@ public class MovieRestController {
 
 	}
 
+	@Operation(summary = "Get a movie by Id")
 	@GetMapping("/{id}")
 	public ResponseEntity<?> showById(@PathVariable Integer id) {
 		Movie movie = null;
@@ -87,6 +96,7 @@ public class MovieRestController {
 		return new ResponseEntity<>(movie, HttpStatus.OK);
 	}
 
+	@Operation(summary = "Create a movie")
 	@PostMapping("/")
 	@ResponseStatus(HttpStatus.CREATED)
 	public ResponseEntity<?> create(@RequestBody Movie movie) {
@@ -109,6 +119,7 @@ public class MovieRestController {
 		return new ResponseEntity<>(response, HttpStatus.CREATED);
 	}
 
+	@Operation(summary = "Update a movie by Id")
 	@PutMapping("/{id}")
 	public ResponseEntity<?> update(@RequestBody Movie movie, @PathVariable Integer id) {
 		Movie movie_actual = movieService.findById(id), movie_updated = null;
@@ -133,6 +144,7 @@ public class MovieRestController {
 		return new ResponseEntity<>(response, HttpStatus.CREATED);
 	}
 
+	@Operation(summary = "Delete a movie by Id")
 	@DeleteMapping("/{id}")
 	public ResponseEntity<?> delete(@PathVariable Integer id) {
 		Map<String, Object> response = new HashMap<>();
