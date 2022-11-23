@@ -20,116 +20,113 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.app.springboot.movies.entities.Movie;
-import com.app.springboot.movies.services.IMovieService;
+import com.app.springboot.movies.entities.Reaction;
+import com.app.springboot.movies.services.IReactionService;
 
 @RestController
-@RequestMapping("/api/movies")
-public class MovieRestController {
-
+@RequestMapping("/api/reactions")
+public class ReactionRestController {
 	@Autowired
-	private IMovieService movieService;
+	private IReactionService reactionService;
 
 	@GetMapping("/")
 	public ResponseEntity<?> index() {
 		Map<String, Object> response = new HashMap<>();
-		List<Movie> movies = null;
+		List<Reaction> reactions = null;
 		try {
-			movies = movieService.findAll();
+			reactions = reactionService.findAll();
 		} catch (DataAccessException e) {
 			// TODO: handle exception
 			response.put("message", "Error when querying the database");
 			response.put("error", e.getMessage().concat(": ").concat(e.getMostSpecificCause().getMessage()));
 			return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
 		}
-		if (movies == null || movies.size() == 0) {
-			response.put("message", "There are no movies registered in the database");
+		if (reactions == null || reactions.size() == 0) {
+			response.put("message", "There are no reactions registered in the database");
 			return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
 		}
-		return new ResponseEntity<>(movies, HttpStatus.OK);
+		return new ResponseEntity<>(reactions, HttpStatus.OK);
 	}
 
 	@GetMapping("/page/{page}")
 	public ResponseEntity<?> index(@PathVariable Integer page) {
 		Map<String, Object> response = new HashMap<>();
-		Page<Movie> movies = null;
+		Page<Reaction> reactions = null;
 		try {
-			movies = movieService.findAll(PageRequest.of(page - 1, 5));
+			reactions = reactionService.findAll(PageRequest.of(page - 1, 5));
 		} catch (DataAccessException e) {
 			// TODO: handle exception
 			response.put("message", "Error when querying the database");
 			response.put("error", e.getMessage().concat(": ").concat(e.getMessage()));
 		}
-		if (movies == null || movies.getContent().size() == 0) {
-			response.put("message", "There are no movies registered in the database " + (page - 1));
+		if (reactions == null || reactions.getContent().size() == 0) {
+			response.put("message", "There are no reactions registered in the database " + (page - 1));
 			return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
 		}
-		return new ResponseEntity<>(movies, HttpStatus.OK);
+		return new ResponseEntity<>(reactions, HttpStatus.OK);
 
 	}
 
 	@GetMapping("/{id}")
 	public ResponseEntity<?> showById(@PathVariable Integer id) {
-		Movie movie = null;
+		Reaction reaction = null;
 		Map<String, Object> response = new HashMap<>();
 		try {
-			movie = movieService.findById(id);
+			reaction = reactionService.findById(id);
 		} catch (DataAccessException e) {
 			// TODO: handle exception
 			response.put("message", "Error when querying the database");
 			response.put("error", e.getMessage().concat(": ").concat(e.getMostSpecificCause().getMessage()));
 			return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
 		}
-		if (movie == null) {
-			response.put("message", "The movie ID: ".concat(id.toString()).concat("does not exist in the database!!"));
+		if (reaction == null) {
+			response.put("message", "The reaction ID: ".concat(id.toString()).concat("does not exist in the database!!"));
 			return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
 		}
-		return new ResponseEntity<>(movie, HttpStatus.OK);
+		return new ResponseEntity<>(reaction, HttpStatus.OK);
 	}
 
 	@PostMapping("/")
 	@ResponseStatus(HttpStatus.CREATED)
-	public ResponseEntity<?> create(@RequestBody Movie movie) {
-		Movie new_movie = null;
+	public ResponseEntity<?> create(@RequestBody Reaction reaction) {
+		Reaction new_reaction = null;
 		Map<String, Object> response = new HashMap<>();
 		try {
-			new_movie = movieService.save(movie);
+			new_reaction = reactionService.save(reaction);
 		} catch (DataAccessException e) {
 			// TODO: handle exception
 			response.put("message", "Error when querying the database");
 			response.put("error", e.getMessage().concat(": ").concat(e.getMostSpecificCause().getMessage()));
 			return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
 		}
-		if (new_movie == null) {
-			response.put("message", "It was not possible to create the new movie contact the administrator");
+		if (new_reaction == null) {
+			response.put("message", "It was not possible to create the new reaction contact the administrator");
 			new ResponseEntity<>(response, HttpStatus.CONFLICT);
 		}
-		response.put("message", "Movie created successfully!!");
-		response.put("movie", new_movie);
+		response.put("message", "Reaction created successfully!!");
+		response.put("reaction", new_reaction);
 		return new ResponseEntity<>(response, HttpStatus.CREATED);
 	}
 
 	@PutMapping("/{id}")
-	public ResponseEntity<?> update(@RequestBody Movie movie, @PathVariable Integer id) {
-		Movie movie_actual = movieService.findById(id), movie_updated = null;
+	public ResponseEntity<?> update(@RequestBody Reaction reaction, @PathVariable Integer id) {
+		Reaction reaction_actual = reactionService.findById(id), reaction_updated = null;
 		Map<String, Object> response = new HashMap<>();
-		if (movie_actual == null) {
-			response.put("message", "The movie ID: ".concat(id.toString()).concat("does not exist in the database!!"));
+		if (reaction_actual == null) {
+			response.put("message", "The reaction ID: ".concat(id.toString()).concat("does not exist in the database!!"));
 			return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
 		}
 		try {
-			movie_actual.setTitle(movie.getTitle());
-			movie_actual.setDuration_time(movie.getDuration_time());
-			movie_actual.setRating(movie.getRating());
-			movie_updated = movieService.save(movie_actual);
+			reaction_actual.setReaction_type(reaction.getReaction_type());
+			reaction_updated = reactionService.save(reaction_actual);
 		} catch (DataAccessException e) {
 			// TODO: handle exception
-			response.put("message", "Error updating the movie in the database!!");
+			response.put("message", "Error updating the reaction in the database!!");
 			response.put("error", e.getMessage().concat(": ").concat(e.getMostSpecificCause().getMessage()));
 			return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
 		}
-		response.put("message", "Movie updated successfully!!");
-		response.put("movie", movie_updated);
+		response.put("message", "Reaction updated successfully!!");
+		response.put("reaction", reaction_updated);
 		return new ResponseEntity<>(response, HttpStatus.CREATED);
 	}
 
@@ -137,15 +134,15 @@ public class MovieRestController {
 	public ResponseEntity<?> delete(@PathVariable Integer id) {
 		Map<String, Object> response = new HashMap<>();
 		try {
-			Movie movie = movieService.findById(id);
-			movieService.delete(id);
+			Reaction reaction = reactionService.findById(id);
+			reactionService.delete(id);
 		} catch (DataAccessException e) {
 			// TODO: handle exception
 			response.put("message", "Error when querying the database!!");
 			response.put("error", e.getMessage().concat(": ").concat(e.getMostSpecificCause().getMessage()));
 			return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
 		}
-		response.put("message", "Movie successfully removed!!");
+		response.put("message", "Reaction successfully removed!!");
 		return new ResponseEntity<>(response, HttpStatus.OK);
 	}
 }
